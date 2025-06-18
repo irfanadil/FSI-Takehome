@@ -1,5 +1,6 @@
 package com.example.hairsalonappointments.data
 
+import kotlinx.coroutines.delay
 import java.util.Calendar
 import java.util.Date
 import kotlin.random.Random
@@ -10,9 +11,9 @@ import kotlin.random.Random
  * This service provides mock data for the application.
  * In a real application, this would make network requests to a backend API.
  */
-class MockApiService {
+object MockApiService {
     
-    private val appointments = listOf(
+    private val appointments = arrayListOf(
         Appointment(
             id = 1,
             clientName = "Jennifer Martinez",
@@ -124,9 +125,10 @@ class MockApiService {
      * 
      * @return List of available time slots as strings
      */
-    fun getAvailableSlots(): List<String> {
+    suspend fun getAvailableSlots(): List<String> {
         // Simulate a small delay that would occur with a real API call
-        Thread.sleep(250)
+        //Thread.sleep(250)
+        delay(250) // But now thread is free to do other work.......
         
         // Generate all possible time slots (9 AM - 6 PM, 30-minute intervals)
         val allSlots = mutableListOf<String>()
@@ -262,25 +264,36 @@ class MockApiService {
         Thread.sleep(400)
         
         // Parse the time slot
-        val timeParts = timeSlot.split(" ")
-        val time = timeParts[0].split(":")
-        var hour = time[0].toInt()
-        val minute = time[1].toInt()
-        if (timeParts[1] == "PM" && hour != 12) hour += 12
-        if (timeParts[1] == "AM" && hour == 12) hour = 0
-        
-        val newId = appointments.maxOf { it.id } + 1
-        
-        return Appointment(
-            id = newId,
-            clientName = clientName,
-            clientPhone = clientPhone,
-            stylistName = stylistName,
-            serviceType = serviceType,
-            appointmentTime = createAppointmentTime(hour, minute),
-            status = AppointmentStatus.CONFIRMED,
-            notes = "New booking via app"
-        )
+         return try {
+            val timeParts = timeSlot.split(" ")
+
+            val time = timeParts[0].split(":")
+            var hour = time[0].toInt()
+            val minute = time[1].toInt()
+            if (timeParts[1] == "PM" && hour != 12) hour += 12
+            if (timeParts[1] == "AM" && hour == 12) hour = 0
+
+            val newId = appointments.maxOf { it.id } + 1
+
+            val newAppointment = Appointment(
+                id = newId,
+                clientName = clientName,
+                clientPhone = clientPhone,
+                stylistName = stylistName,
+                serviceType = serviceType,
+                appointmentTime = createAppointmentTime(hour, minute),
+                status = AppointmentStatus.CONFIRMED,
+                notes = "New booking via app"
+            )
+
+             appointments.add(newAppointment)
+             newAppointment
+        }
+        catch (exception: Exception){
+            null
+        }
+
+
     }
     
     /**

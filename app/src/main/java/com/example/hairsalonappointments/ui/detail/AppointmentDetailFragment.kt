@@ -15,10 +15,10 @@ import java.util.Locale
 
 /**
  * Fragment for displaying appointment details
- * 
+ *
  * TASK FOR CANDIDATE:
  * Implement the functionality to display appointment details.
- * 
+ *
  * Requirements:
  * - Receive appointment ID from navigation arguments
  * - Load appointment details from MockApiService
@@ -27,16 +27,16 @@ import java.util.Locale
  * - Handle case when appointment is not found
  */
 class AppointmentDetailFragment : Fragment() {
-    
+
     private var _binding: FragmentAppointmentDetailBinding? = null
     private val binding get() = _binding!!
-    
+
     private val args: AppointmentDetailFragmentArgs by navArgs()
-    private lateinit var apiService: MockApiService
-    
+    private  val apiService = MockApiService //by lazy { MockApiService() } // initialize when use for the first time...
+
     private val timeFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())
     private val dateFormatter = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
-    
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -45,23 +45,23 @@ class AppointmentDetailFragment : Fragment() {
         _binding = FragmentAppointmentDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         loadAppointmentDetails()
     }
-    
+
     /**
      * TODO: Implement this function
-     * 
+     *
      * Load and display appointment details.
      * - Initialize MockApiService
      * - Get appointment by ID (from args.appointmentId)
      * - Display all appointment information in the UI
      * - Format time, date, price, and duration appropriately
      * - Show error state if appointment not found
-     * 
+     *
      * UI elements to update:
      * - textViewClientName
      * - textViewClientPhone
@@ -80,13 +80,14 @@ class AppointmentDetailFragment : Fragment() {
         // 2. Get appointment by ID from args
         // 3. Update all UI elements with appointment data
         // 4. Handle null case (appointment not found)
-        
-        throw NotImplementedError("Candidate needs to implement loadAppointmentDetails()")
+        apiService.getAppointmentById(args.appointmentId)?.let {
+            displayAppointment(it)
+        } ?: showErrorState()
     }
-    
+
     /**
      * Helper function to display appointment data
-     * 
+     *
      * @param appointment The appointment to display
      */
     private fun displayAppointment(appointment: Appointment) {
@@ -99,10 +100,10 @@ class AppointmentDetailFragment : Fragment() {
             textViewDate.text = dateFormatter.format(appointment.appointmentTime)
             textViewDuration.text = "${appointment.serviceType.duration} minutes"
             textViewPrice.text = "$${String.format("%.2f", appointment.serviceType.price)}"
-            
+
             // Status with appropriate styling
             textViewStatus.text = appointment.status.name.replace("_", " ")
-            
+
             // Notes
             if (appointment.notes.isNullOrEmpty()) {
                 textViewNotesLabel.visibility = View.GONE
@@ -114,7 +115,7 @@ class AppointmentDetailFragment : Fragment() {
             }
         }
     }
-    
+
     /**
      * Show error state when appointment is not found
      */
@@ -124,7 +125,7 @@ class AppointmentDetailFragment : Fragment() {
         // You might want to add an error TextView in the layout
         // For now, we'll just hide the content
     }
-    
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

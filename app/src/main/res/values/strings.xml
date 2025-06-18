@@ -29,4 +29,7 @@
     <string name="stylist_format">with %s</string>
     <string name="duration_format">Duration: %d minutes</string>
     <string name="price_format">$%.2f</string>
+
+    <!--Search-->
+    <string name="filter_client_name_or_stylist">Filter By Client Name or Stylist</string>
 </resources>

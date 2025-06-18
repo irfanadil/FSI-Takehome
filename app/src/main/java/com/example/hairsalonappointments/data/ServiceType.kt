@@ -10,5 +10,16 @@ enum class ServiceType(val displayName: String, val duration: Int, val price: Do
     BLOWOUT("Blowout", 45, 50.00),
     DEEP_CONDITIONING("Deep Conditioning", 45, 60.00),
     UPDO("Updo", 60, 80.00),
-    EXTENSIONS("Extensions", 240, 400.00)
+    EXTENSIONS("Extensions", 240, 400.00);
+
+    companion object {
+        fun getAllFormattedServices(): List<String> {
+            return ServiceType.entries.map { it.displayName+ " - "+it.duration+" minutes" }
+        }
+
+        fun getServiceTypeFromDisplayName(displayName: String): ServiceType? {
+            return ServiceType.entries.firstOrNull { it.displayName == displayName }
+        }
+
+    }
 }

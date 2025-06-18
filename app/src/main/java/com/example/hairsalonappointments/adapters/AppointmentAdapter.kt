@@ -1,11 +1,15 @@
 package com.example.hairsalonappointments.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hairsalonappointments.data.Appointment
+import com.example.hairsalonappointments.data.AppointmentStatus
+import com.example.hairsalonappointments.data.ServiceType
 import com.example.hairsalonappointments.databinding.ItemAppointmentBinding
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 /**
@@ -43,8 +47,8 @@ class AppointmentAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppointmentViewHolder {
         // TODO: Implement view holder creation
         // Hint: Use ItemAppointmentBinding.inflate(...)
-        
-        throw NotImplementedError("Candidate needs to implement onCreateViewHolder()")
+        return AppointmentViewHolder(ItemAppointmentBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        //throw NotImplementedError("Candidate needs to implement onCreateViewHolder()")
     }
     
     /**
@@ -66,8 +70,17 @@ class AppointmentAdapter(
         // Get the appointment at this position
         // Bind all the data to the views
         // Set click listener
-        
-        throw NotImplementedError("Candidate needs to implement onBindViewHolder()")
+        val appointment =appointments[position]
+
+        holder.binding.textViewStatus.text = appointment.status.name
+        holder.binding.textViewTime.text = appointment.appointmentTime.toString()
+        holder.binding.textViewClientName.text= appointment.clientName
+        holder.binding.textViewService.text  = appointment.serviceType.displayName
+        holder.binding.textViewStylist.text  = appointment.stylistName
+        holder.itemView.setOnClickListener {
+            onAppointmentClick(appointment)
+        }
+        //throw NotImplementedError("Candidate needs to implement onBindViewHolder()")
     }
     
     override fun getItemCount(): Int = appointments.size
@@ -78,7 +91,9 @@ class AppointmentAdapter(
      * @param newAppointments The new list of appointments to display
      */
     fun submitList(newAppointments: List<Appointment>) {
+        Log.e("TAG" , "newAppointments.size ="+newAppointments.size.toString())
         appointments = newAppointments
+        Log.e("TAG" ,"appointments.size ="+appointments.size.toString())
         notifyDataSetChanged()
     }
     

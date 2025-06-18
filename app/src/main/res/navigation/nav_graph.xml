@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_appointmentListFragment_to_appointmentDetailFragment"
             app:destination="@id/appointmentDetailFragment" />
+        <action
+            android:id="@+id/action_appointmentListFragment_to_appointmentBookFragment"
+            app:destination="@id/appointmentBookFragment" />
     </fragment>
 
     <fragment
@@ -24,5 +27,17 @@
             android:name="appointmentId"
             app:argType="integer" />
     </fragment>
+
+
+    <fragment
+        android:id="@+id/appointmentBookFragment"
+        android:name="com.example.hairsalonappointments.ui.booking.listing.BookingFragment"
+        android:label="Appointment Booking"
+        tools:layout="@layout/fragment_appointment_booking_list">
+
+    </fragment>
+
+
+
 
 </navigation>
