@@ -5,11 +5,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.hairsalonappointments.data.Appointment
-import com.example.hairsalonappointments.data.AppointmentStatus
-import com.example.hairsalonappointments.data.ServiceType
 import com.example.hairsalonappointments.databinding.ItemAppointmentBinding
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 /**
@@ -26,8 +23,15 @@ import java.util.Locale
  * - Handle click events to navigate to detail view
  * - Use view binding (already set up in gradle)
  */
+
+enum class NavigateTo() {
+    CLIENT_PREVIOUS_APPOINTMENT_SCREEN,
+    BOOKING_DETAIL_SCREEN,
+    STYLIST_SCREEN
+}
+
 class AppointmentAdapter(
-    private val onAppointmentClick: (Appointment) -> Unit
+    private val onAppointmentClick: (Appointment, NavigateTo) -> Unit
 ) : RecyclerView.Adapter<AppointmentAdapter.AppointmentViewHolder>() {
     
     private var appointments = emptyList<Appointment>()
@@ -77,8 +81,12 @@ class AppointmentAdapter(
         holder.binding.textViewClientName.text= appointment.clientName
         holder.binding.textViewService.text  = appointment.serviceType.displayName
         holder.binding.textViewStylist.text  = appointment.stylistName
+        holder.binding.clientInfo.tag  = appointment.clientPhone
+        holder.binding.clientInfo.setOnClickListener {
+            onAppointmentClick(appointment , NavigateTo.CLIENT_PREVIOUS_APPOINTMENT_SCREEN)
+        }
         holder.itemView.setOnClickListener {
-            onAppointmentClick(appointment)
+            onAppointmentClick(appointment , NavigateTo.BOOKING_DETAIL_SCREEN)
         }
         //throw NotImplementedError("Candidate needs to implement onBindViewHolder()")
     }

@@ -68,17 +68,6 @@
             app:layout_constraintTop_toBottomOf="@id/textViewService"
             tools:text="with Sarah Johnson" />
 
-        <TextView
-            android:id="@+id/clientInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="- More Info..."
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/textViewClientName"
-            app:layout_constraintStart_toEndOf="@+id/textViewClientName"
-            app:layout_constraintTop_toTopOf="@+id/textViewClientName" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

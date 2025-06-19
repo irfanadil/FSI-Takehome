@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.hairsalonappointments.R
 import com.example.hairsalonappointments.adapters.AppointmentAdapter
+import com.example.hairsalonappointments.adapters.NavigateTo
 import com.example.hairsalonappointments.data.Appointment
 import com.example.hairsalonappointments.data.AppointmentStatus
 import com.example.hairsalonappointments.data.MockApiService
@@ -75,8 +76,8 @@ class AppointmentListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = AppointmentAdapter { appointment ->
-            onAppointmentClick(appointment)
+        adapter = AppointmentAdapter { appointment , navigateTo ->
+            onAppointmentClick(appointment, navigateTo)
         }
 
         binding.recyclerViewAppointments.apply {
@@ -92,7 +93,6 @@ class AppointmentListFragment : Fragment() {
                     showingAllAppointments = true
                     updateAppointmentList()
                 }
-
                 R.id.chipAvailable -> {
                     showingAllAppointments = false
                     updateAppointmentList()
@@ -145,6 +145,7 @@ class AppointmentListFragment : Fragment() {
     }
 
 
+
     /**
      * TODO: Implement this function
      *
@@ -168,7 +169,6 @@ class AppointmentListFragment : Fragment() {
         Log.e("TAG", "ALL-Appointments =" + allAppointments.size.toString())
         if (allAppointments.isNotEmpty())
             adapter.submitList(allAppointments)
-        //throw NotImplementedError("Candidate needs to implement loadAppointments()")
     }
 
     /**
@@ -181,13 +181,22 @@ class AppointmentListFragment : Fragment() {
      *
      * @param appointment The clicked appointment
      */
-    private fun onAppointmentClick(appointment: Appointment) {
-        // TODO: Implement navigation to detail screen
-        // Use findNavController() and navigate with appointment ID
-        findNavController().navigate(
-            R.id.action_appointmentListFragment_to_appointmentDetailFragment,
-            bundleOf("appointmentId" to appointment.id)
-        )
+    private fun onAppointmentClick(appointment: Appointment , navigateTo: NavigateTo) {
+        when(navigateTo){
+            NavigateTo.CLIENT_PREVIOUS_APPOINTMENT_SCREEN ->
+                findNavController().navigate(
+                    R.id.action_appointmentListFragment_to_clientHistoryFragment,
+                    bundleOf("phoneNumber" to appointment.clientPhone)
+                )
+            NavigateTo.BOOKING_DETAIL_SCREEN ->
+                findNavController().navigate(
+                    R.id.action_appointmentListFragment_to_appointmentDetailFragment,
+                    bundleOf("appointmentId" to appointment.id)
+                )
+            NavigateTo.STYLIST_SCREEN -> {
+
+            }
+        }
     }
 
     /**
@@ -203,7 +212,6 @@ class AppointmentListFragment : Fragment() {
                         it.status == AppointmentStatus.CONFIRMED
             }
         }
-
         adapter.submitList(appointmentsToShow)
         updateEmptyState(appointmentsToShow.isEmpty())
     }

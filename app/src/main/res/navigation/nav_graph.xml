@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_appointmentListFragment_to_appointmentBookFragment"
             app:destination="@id/appointmentBookFragment" />
+        <action
+            android:id="@+id/action_appointmentListFragment_to_clientHistoryFragment"
+            app:destination="@id/clientHistoryFragment" />
     </fragment>
 
     <fragment
@@ -38,6 +41,14 @@
     </fragment>
 
 
-
+    <fragment
+        android:id="@+id/clientHistoryFragment"
+        android:name="com.example.hairsalonappointments.ui.clients.ClientHistoryFragment"
+        android:label="Appointments"
+        tools:layout="@layout/fragment_client_history">
+        <argument
+            android:name="phoneNumber"
+            app:argType="string" />
+    </fragment>
 
 </navigation>
