@@ -25,7 +25,6 @@ class BookingFragment : Fragment()
     private val binding get() = _binding!!
 
     private lateinit var adapter: BookingAdapter
-    private  val apiService= MockApiService //by lazy { MockApiService() }
     private var availableAppointments = emptyList<String>()
 
     private val viewModel: BookingViewModel by activityViewModels()

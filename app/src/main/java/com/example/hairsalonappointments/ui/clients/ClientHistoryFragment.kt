@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.hairsalonappointments.data.Appointment
 import com.example.hairsalonappointments.data.MockApiService
 import com.example.hairsalonappointments.databinding.FragmentClientHistoryBinding
-
 import kotlin.getValue
 
 class ClientHistoryFragment : Fragment() {
@@ -47,7 +46,6 @@ class ClientHistoryFragment : Fragment() {
     }
 
     private fun loadClientHistory() {
-
         clientPreviousAppointment = MockApiService.getClientHistory(args.phoneNumber)
         if (clientPreviousAppointment.isNotEmpty()) {
             binding.textViewTitle.text = clientPreviousAppointment.first().clientName+ " Appointments"

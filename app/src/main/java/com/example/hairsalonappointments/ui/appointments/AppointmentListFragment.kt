@@ -9,19 +9,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.hairsalonappointments.R
-import com.example.hairsalonappointments.adapters.AppointmentAdapter
-import com.example.hairsalonappointments.adapters.NavigateTo
+import com.example.hairsalonappointments.ui.appointments.adapters.AppointmentAdapter
+import com.example.hairsalonappointments.ui.appointments.adapters.NavigateTo
 import com.example.hairsalonappointments.data.Appointment
 import com.example.hairsalonappointments.data.AppointmentStatus
 import com.example.hairsalonappointments.data.MockApiService
 import com.example.hairsalonappointments.databinding.FragmentAppointmentListBinding
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.hairsalonappointments.ui.booking.BookingViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlin.collections.emptyList
+import kotlin.getValue
 
 /**
  * Fragment for displaying the list of appointments
@@ -55,7 +58,7 @@ class AppointmentListFragment : Fragment() {
     private lateinit var apiService: MockApiService
     private var allAppointments = emptyList<Appointment>()
     private var showingAllAppointments = true
-
+    private val viewModel: MainViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -70,8 +73,8 @@ class AppointmentListFragment : Fragment() {
 
         setupRecyclerView()
         setupFilterToggle()
-        setupFilterSearch()
         loadAppointments()
+        setupFilterSearch()
         addBookingFabIcon()
     }
 
@@ -101,40 +104,23 @@ class AppointmentListFragment : Fragment() {
         }
     }
 
-
-    @OptIn(FlowPreview::class)
     private fun setupFilterSearch() {
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.observeSearch().collect { filteredAppointment ->
+                    adapter.submitList(filteredAppointment)
+                    updateEmptyState(filteredAppointment.isEmpty())
+                }
+            }
+        }
         binding.searchFilter.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable) {
-                val str: String = s.toString()
-                /*
-                   val appointmentsToShow =  allAppointments.filter {
-                       it.clientName.contains(str,true) || it.stylistName.contains(str,true)
-                   }
-                */
-                lifecycleScope.launch {
-                    lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                        searchAppointment(str).collect { filteredAppointment ->
-                            adapter.submitList(filteredAppointment)
-                            updateEmptyState(filteredAppointment.isEmpty())
-                        }
-                    }
-                }
+                viewModel.onQueryChanged(s.toString())
             }
         })
     }
-
-    private fun searchAppointment(query: String): Flow<List<Appointment>> = flow {
-        val filtered = allAppointments.filter { item ->
-            item.clientName.contains(query, true) ||
-                    item.stylistName.contains(query, true)
-        }
-        emit(filtered)
-    }.debounce(3000).distinctUntilChanged()
-        .flowOn(Dispatchers.Default)// Process filtering off UI thread
-
 
     private fun addBookingFabIcon(){
         binding.fab.setOnClickListener {
@@ -143,8 +129,6 @@ class AppointmentListFragment : Fragment() {
             )
         }
     }
-
-
 
     /**
      * TODO: Implement this function
@@ -163,12 +147,23 @@ class AppointmentListFragment : Fragment() {
         // 3. Store in allAppointments
         // 4. Update the RecyclerView
         // 5. Handle empty state
-        apiService = MockApiService
-        allAppointments = listOf()
-        allAppointments = allAppointments + apiService.getTodaysAppointments()
-        Log.e("TAG", "ALL-Appointments =" + allAppointments.size.toString())
-        if (allAppointments.isNotEmpty())
-            adapter.submitList(allAppointments)
+        //apiService = MockApiService
+        //allAppointments = listOf()
+        //allAppointments = allAppointments + apiService.getTodaysAppointments()
+        //Log.e("TAG", "ALL-Appointments =" + allAppointments.size.toString())
+        //if (allAppointments.isNotEmpty())
+            //adapter.submitList(allAppointments)
+
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.allAppointmentsStateFlow.collect { allAppointments ->
+                    adapter.submitList(allAppointments)
+                    updateEmptyState(allAppointments.isEmpty())
+                }
+            }
+        }
+        viewModel.loadAllAppointments()
+
     }
 
     /**

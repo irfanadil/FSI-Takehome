@@ -1,4 +1,4 @@
-package com.example.hairsalonappointments.adapters
+package com.example.hairsalonappointments.ui.appointments.adapters
 
 import android.util.Log
 import android.view.LayoutInflater
