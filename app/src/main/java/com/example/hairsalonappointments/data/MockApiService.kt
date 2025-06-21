@@ -1,6 +1,9 @@
 package com.example.hairsalonappointments.data
 
+import android.util.Log
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Calendar
 import java.util.Date
 import kotlin.random.Random
@@ -13,7 +16,7 @@ import kotlin.random.Random
  */
 object MockApiService {
     
-    private val appointments = arrayListOf(
+    private val appointmentsArrayList = listOf(
         Appointment(
             id = 1,
             clientName = "Jennifer Martinez",
@@ -34,6 +37,7 @@ object MockApiService {
             status = AppointmentStatus.COMPLETED,
             notes = null
         ),
+        /*
         Appointment(
             id = 3,
             clientName = "Ashley Thompson",
@@ -94,17 +98,23 @@ object MockApiService {
             status = AppointmentStatus.PENDING,
             notes = "Dry, damaged hair - recommended deep conditioning treatment"
         )
+
+         */
     )
+
+    //val appointments = MutableStateFlow(appointmentsDemo)
+    private val appointments = MutableStateFlow(appointmentsArrayList)
     
     /**
      * Returns a list of today's appointments.
      * 
      * @return List of appointments for today
      */
-    fun getTodaysAppointments(): List<Appointment> {
+    fun getTodaysAppointments(): StateFlow<List<Appointment>> {
         // Simulate a small delay that would occur with a real API call
         Thread.sleep(300)
-        return appointments
+
+        return  appointments
     }
     
     /**
@@ -116,7 +126,7 @@ object MockApiService {
     fun getAppointmentById(id: Int): Appointment? {
         // Simulate a small delay that would occur with a real API call
         Thread.sleep(200)
-        return appointments.find { it.id == id }
+        return appointments.value.toList().find { it.id == id }
     }
     
     /**
@@ -140,7 +150,7 @@ object MockApiService {
         }
         
         // Remove slots that have appointments
-        val bookedTimes = appointments.map { appointment ->
+        val bookedTimes = appointments.value.map { appointment ->
             val calendar = Calendar.getInstance()
             calendar.time = appointment.appointmentTime
             val hour = calendar.get(Calendar.HOUR)
@@ -158,7 +168,7 @@ object MockApiService {
     fun getStylistStats(): List<StylistStats> {
         Thread.sleep(300)
         
-        val stylistGroups = appointments.groupBy { it.stylistName }
+        val stylistGroups = appointments.value.groupBy { it.stylistName }
         return stylistGroups.map { (stylistName, appointments) ->
             val totalRevenue = appointments.sumOf { it.serviceType.price }
             val services = appointments.map { it.serviceType }.distinct()
@@ -179,7 +189,7 @@ object MockApiService {
     fun getServiceStats(): List<ServiceStats> {
         Thread.sleep(250)
         
-        val serviceGroups = appointments.groupBy { it.serviceType }
+        val serviceGroups = appointments.value.groupBy { it.serviceType }
         return serviceGroups.map { (serviceType, appointments) ->
             ServiceStats(
                 serviceType = serviceType,
@@ -197,10 +207,10 @@ object MockApiService {
     fun getDailyRevenue(): DailyRevenue {
         Thread.sleep(200)
         
-        val totalRevenue = appointments.sumOf { it.serviceType.price }
-        val revenueByService = appointments.groupBy { it.serviceType }
+        val totalRevenue = appointments.value.sumOf { it.serviceType.price }
+        val revenueByService = appointments.value.groupBy { it.serviceType }
             .mapValues { (_, appointments) -> appointments.sumOf { it.serviceType.price } }
-        val revenueByStylist = appointments.groupBy { it.stylistName }
+        val revenueByStylist = appointments.value.groupBy { it.stylistName }
             .mapValues { (_, appointments) -> appointments.sumOf { it.serviceType.price } }
         
         return DailyRevenue(
@@ -208,7 +218,7 @@ object MockApiService {
             totalRevenue = totalRevenue,
             revenueByService = revenueByService,
             revenueByStylist = revenueByStylist,
-            appointmentCount = appointments.size
+            appointmentCount = appointments.value.size
         )
     }
     
@@ -219,7 +229,7 @@ object MockApiService {
         Thread.sleep(300)
         
         // For demo purposes, return past appointments for the client
-        val clientAppointments = appointments.filter { it.clientPhone == clientPhone }
+        val clientAppointments = appointments.value.filter { it.clientPhone == clientPhone }
         
         // Create some historical appointments
         val historicalAppointments = clientAppointments.flatMap { appointment ->
@@ -248,20 +258,22 @@ object MockApiService {
         
         // In a real app, this would update the database
         // For demo, just return success if appointment exists
-        return appointments.any { it.id == appointmentId }
+        return appointments.value.any { it.id == appointmentId }
     }
     
     /**
      * Book a new appointment slot
      */
-    fun bookAppointmentSlot(
+    suspend fun bookAppointmentSlot(
         timeSlot: String,
         clientName: String,
         clientPhone: String,
         stylistName: String,
         serviceType: ServiceType
     ): Appointment? {
-        Thread.sleep(400)
+
+
+        delay(9000) // 9 seconds will give user chance to move back to the main screen and get update there...
         
         // Parse the time slot
          return try {
@@ -273,7 +285,7 @@ object MockApiService {
             if (timeParts[1] == "PM" && hour != 12) hour += 12
             if (timeParts[1] == "AM" && hour == 12) hour = 0
 
-            val newId = appointments.maxOf { it.id } + 1
+            val newId = appointments.value.maxOf { it.id } + 1
 
             val newAppointment = Appointment(
                 id = newId,
@@ -286,7 +298,9 @@ object MockApiService {
                 notes = "New booking via app"
             )
 
-             appointments.add(newAppointment)
+             // this will change the MutableStateFlow value and should reflect in the main screen automatically with loading....
+             appointments.value = appointments.value + newAppointment
+
              newAppointment
         }
         catch (exception: Exception){

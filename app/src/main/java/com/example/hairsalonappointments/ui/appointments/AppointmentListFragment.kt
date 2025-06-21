@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,14 +22,6 @@ import com.example.hairsalonappointments.data.Appointment
 import com.example.hairsalonappointments.data.AppointmentStatus
 import com.example.hairsalonappointments.data.MockApiService
 import com.example.hairsalonappointments.databinding.FragmentAppointmentListBinding
-import com.example.hairsalonappointments.ui.booking.BookingViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlin.collections.emptyList
 import kotlin.getValue
@@ -141,29 +132,14 @@ class AppointmentListFragment : Fragment() {
      * - Handle any errors gracefully
      */
     private fun loadAppointments() {
-        // TODO: Implement appointment loading
-        // 1. Initialize MockApiService
-        // 2. Get today's appointments
-        // 3. Store in allAppointments
-        // 4. Update the RecyclerView
-        // 5. Handle empty state
-        //apiService = MockApiService
-        //allAppointments = listOf()
-        //allAppointments = allAppointments + apiService.getTodaysAppointments()
-        //Log.e("TAG", "ALL-Appointments =" + allAppointments.size.toString())
-        //if (allAppointments.isNotEmpty())
-            //adapter.submitList(allAppointments)
-
         lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.allAppointmentsStateFlow.collect { allAppointments ->
-                    adapter.submitList(allAppointments)
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.appointmentsListStateFlow.collect { allAppointments ->
+                     adapter.submitList(allAppointments)
                     updateEmptyState(allAppointments.isEmpty())
                 }
             }
         }
-        viewModel.loadAllAppointments()
-
     }
 
     /**
